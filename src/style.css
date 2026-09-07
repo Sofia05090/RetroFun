@@ -261,32 +261,54 @@ footer .pixel{font-size:.6rem; color:var(--cyan); display:block; margin-bottom:1
 .konami-toast.show{opacity:1; transform:translate(-50%,0);}
 .konami-toast small{display:block; margin-top:8px; color:var(--ice); font-family:var(--text); font-size:.8rem;}
 
-/* Puntero global con diseño de Space Invaders */
-body, body * {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2329e0ff' d='M6 2h2v2H6V2m10 0h2v2h-2V2M4 6h2v2H4V6m14 0h2v2h-2V6M2 8h20v2H2V8m0 2h20v4H2v-4m2 4h2v2H4v-2m14 0h2v2h-2v-2m-8 2h4v2h-4v-2z'/%3E%3C/svg%3E"), auto !important;
+/* Pista discreta del Konami Code — visible pero de bajo perfil,
+   se ilumina al pasar el mouse como invitación a probarla */
+.konami-hint{
+  margin-top:18px;
+  font-size:.55rem;
+  letter-spacing:4px;
+  color:var(--yellow);
+  opacity:.3;
+  cursor:default;
+  transition:opacity .25s ease, text-shadow .25s ease;
 }
-
-input, textarea {
-  cursor: text !important;
+.konami-hint:hover{
+  opacity:1;
+  text-shadow:0 0 8px var(--yellow);
 }
+/* ============================================================
+   LASER SHOTS — ahora con color, ángulo y escala dinámicos
+   (reemplaza tu bloque .laser-shot / @keyframes laser-shoot)
+   ============================================================ */
 .laser-shot {
   position: fixed;
   width: 4px;
   height: 14px;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
+  border-radius: 2px;
+  background: var(--shot-color, var(--cyan));
+  box-shadow:
+    0 0 8px var(--shot-color, var(--cyan)),
+    0 0 16px var(--shot-color, var(--cyan));
   pointer-events: none;
   z-index: 10001;
   animation: laser-shoot 0.6s linear forwards;
 }
 
 @keyframes laser-shoot {
-  0% { transform: translate(-50%, 0); opacity: 1; }
-  100% { transform: translate(-50%, -120px); opacity: 0; }
+  0% {
+    transform: translate(-50%, 0) rotate(var(--angle, 0deg)) scale(var(--shot-scale, 1));
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -120px) rotate(var(--angle, 0deg)) scale(var(--shot-scale, 1));
+    opacity: 0;
+  }
 }
 
-/* --- ARCADE GHOST PATROL: DISEÑO PIXEL ART AUTÉNTICO --- */
-
+/* ============================================================
+   ARCADE GHOST PATROL — pixel art + flip de dirección + bobbing
+   controlado desde JS vía variables CSS (sin pelear con inline)
+   ============================================================ */
 .pacman-ghost-idle {
   position: fixed;
   bottom: 25px;
@@ -298,14 +320,17 @@ input, textarea {
   opacity: 0;
   transition: opacity 0.3s ease;
   clip-path: polygon(
-    25% 0%, 75% 0%, 
-    100% 25%, 100% 100%, 
-    88% 80%, 75% 95%, 
-    62% 80%, 50% 95%, 
-    38% 80%, 25% 95%, 
-    12% 80%, 0% 95%, 
+    25% 0%, 75% 0%,
+    100% 25%, 100% 100%,
+    88% 80%, 75% 95%,
+    62% 80%, 50% 95%,
+    38% 80%, 25% 95%,
+    12% 80%, 0% 95%,
     0% 25%
   );
+  /* El transform final combina el flip de dirección (--ghost-flip: 1 o -1)
+     con el bobbing vertical (--ghost-bob), ambos seteados por el JS en cada frame */
+  transform: scaleX(var(--ghost-flip, 1)) translateY(var(--ghost-bob, 0px));
 }
 
 /* Colores vibrantes con halo lumínico de gabinete arcade */
@@ -329,12 +354,324 @@ input, textarea {
 .pacman-ghost-idle::before { left: 9px; box-shadow: inset 5px 0 0 #0000cc; }
 .pacman-ghost-idle::after  { right: 9px; box-shadow: inset 5px 0 0 #0000cc; }
 
+/* Antes esta clase animaba transform (translateY/scaleY), lo que competía
+   con el bobbing que ahora pone el JS en --ghost-bob. Se cambió a un
+   pulso de brillo, que no toca transform y no genera parpadeo. */
 .pacman-ghost-idle.active {
   opacity: 1;
-  animation: ghost-float-arcade 0.35s infinite alternate ease-in-out;
+  animation: ghost-glow-pulse 0.6s infinite alternate ease-in-out;
 }
 
-@keyframes ghost-float-arcade {
-  0% { transform: translateY(0) scaleY(1); }
-  100% { transform: translateY(-6px) scaleY(0.97); }
+@keyframes ghost-glow-pulse {
+  0%   { filter: brightness(1); }
+  100% { filter: brightness(1.3); }
 }
+
+/* ============================================================
+   PUNTERO — nave/cañón estilo Space Invaders (reemplaza al invasor)
+   Hotspot centrado (12 12) para que el láser salga desde el centro
+   de la nave, no desde la esquina superior izquierda.
+   ============================================================ */
+body, body * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cg fill='%2329e0ff'%3E%3Crect x='11' y='5' width='2' height='2'/%3E%3Crect x='9' y='7' width='6' height='2'/%3E%3Crect x='9' y='9' width='6' height='2'/%3E%3Crect x='3' y='11' width='18' height='2'/%3E%3Crect x='1' y='13' width='22' height='2'/%3E%3Crect x='1' y='15' width='22' height='2'/%3E%3Crect x='1' y='17' width='4' height='2'/%3E%3Crect x='7' y='17' width='10' height='2'/%3E%3Crect x='19' y='17' width='4' height='2'/%3E%3C/g%3E%3C/svg%3E") 12 12, auto !important;
+}
+
+input, textarea {
+  cursor: text !important;
+}
+
+/* ============================================================
+   LASER SHOTS — fiel al cañón del jugador en Space Invaders:
+   una sola línea vertical, segmentada en pixeles, movimiento
+   "a saltos" (steps) en vez de un deslizamiento suave moderno.
+   (reemplaza tu bloque .laser-shot / @keyframes laser-shoot)
+   ============================================================ */
+.laser-shot {
+  position: fixed;
+  width: 3px;
+  height: 16px;
+  pointer-events: none;
+  z-index: 10001;
+  background: repeating-linear-gradient(
+    to bottom,
+    #ffffff 0px, #ffffff 3px,
+    transparent 3px, transparent 5px
+  );
+  box-shadow: 0 0 4px var(--cyan), 0 0 8px var(--cyan);
+  image-rendering: pixelated;
+  animation: laser-shoot 0.5s steps(10, end) forwards;
+}
+
+@keyframes laser-shoot {
+  0%   { transform: translate(-50%, 0); }
+  100% { transform: translate(-50%, -140px); }
+}
+
+/* ============================================================
+   ARCADE GHOST PATROL — silueta clásica de Pac-Man
+   (cúpula redondeada + patas onduladas + ojos que miran
+   en la dirección de movimiento). El JS no cambia: sigue
+   controlando --ghost-flip y --ghost-bob, y la clase .active.
+   ============================================================ */
+.pacman-ghost-idle {
+  position: fixed;
+  bottom: 25px;
+  left: -140px;
+  width: 44px;
+  height: 44px;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  /* cúpula redondeada arriba, recta abajo */
+  border-radius: 50% 50% 0 0;
+
+  /* patas: 4 mordidas circulares color navy sobre el borde inferior */
+  background-image:
+    radial-gradient(circle 6px at 10% 100%, var(--navy) 5.6px, transparent 6px),
+    radial-gradient(circle 6px at 36% 100%, var(--navy) 5.6px, transparent 6px),
+    radial-gradient(circle 6px at 64% 100%, var(--navy) 5.6px, transparent 6px),
+    radial-gradient(circle 6px at 90% 100%, var(--navy) 5.6px, transparent 6px);
+  background-repeat: no-repeat;
+
+  transform: scaleX(var(--ghost-flip, 1)) translateY(var(--ghost-bob, 0px));
+}
+
+/* Colores vibrantes con halo lumínico de gabinete arcade */
+.pacman-ghost-idle.blinky { background-color: #ff1c1c; box-shadow: 0 0 16px rgba(255, 28, 28, 0.85); }
+.pacman-ghost-idle.pinky  { background-color: #ff85ff; box-shadow: 0 0 16px rgba(255, 133, 255, 0.85); }
+.pacman-ghost-idle.inky   { background-color: #00f0f0; box-shadow: 0 0 16px rgba(0, 240, 240, 0.85); }
+.pacman-ghost-idle.clyde  { background-color: #ff9f1c; box-shadow: 0 0 16px rgba(255, 159, 28, 0.85); }
+
+/* Ojos blancos redondos con pupila oscura que "mira" hacia
+   donde avanza el fantasma (usa --ghost-flip para el offset) */
+.pacman-ghost-idle::before,
+.pacman-ghost-idle::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  background-image: radial-gradient(
+    circle 3.6px at calc(50% + (var(--ghost-flip, 1) * 3px)) 50%,
+    #0a1a6b 3.6px,
+    transparent 3.8px
+  );
+}
+
+.pacman-ghost-idle::before { left: 8px; }
+.pacman-ghost-idle::after  { right: 8px; }
+
+/* Pulso de brillo al patrullar (no toca transform, sin conflicto con el bobbing) */
+.pacman-ghost-idle.active {
+  opacity: 1;
+  animation: ghost-glow-pulse 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes ghost-glow-pulse {
+  0%   { filter: brightness(1); }
+  100% { filter: brightness(1.3); }
+}
+
+.barrel-hero {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+  padding: 10px 14px;
+  background: var(--panel2);
+  border: 2px solid var(--ice);
+  box-shadow: 0 6px 0 rgba(0,0,0,.35);
+  transition: transform .2s ease;
+}
+
+.barrel-hero-avatar {
+  font-size: 1.8rem;
+  animation: bhBounce 1.8s ease-in-out infinite;
+}
+
+.hero-bubble {
+  font-family: var(--text);
+  font-size: .8rem;
+  color: var(--ice);
+  transition: opacity .2s ease;
+}
+
+.barrel-hero.celebrate {
+  border-color: var(--yellow);
+  animation: bhCelebrate .7s ease;
+}
+
+@keyframes bhBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes bhCelebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+@media (max-width: 480px) {
+  .barrel-hero { max-width: 200px; padding: 8px 10px; }
+  .hero-bubble { font-size: .72rem; }
+}
+
+.tetris-grid {
+  position: fixed;
+  left: 16px;
+  bottom: 20px;
+  z-index: 998;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-auto-rows: 12px;
+  gap: 2px;
+  width: 90px;
+  padding: 4px;
+  background: var(--panel2);
+  border: 2px solid var(--ice);
+}
+
+.tetris-cell {
+  width: 100%;
+  height: 100%;
+  background: rgba(238,243,247,.06); /* celda vacía */
+  transition: background .1s ease;
+}
+
+.tetris-cell.filled {
+  animation: cellDrop .18s ease forwards;
+}
+
+@keyframes cellDrop {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.tetris-cell.clearing {
+  animation: lineClear .35s ease forwards;
+}
+
+@keyframes lineClear {
+  0% { background: var(--ice); }
+  100% { background: rgba(238,243,247,.06); opacity: 0; }
+}
+
+.tetris-toast {
+  position: fixed;
+  left: 16px;
+  bottom: 300px;
+  z-index: 998;
+  font-family: var(--pixel);
+  font-size: .6rem;
+  color: var(--yellow);
+  background: var(--navy);
+  border: 2px solid var(--yellow);
+  padding: 6px 10px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all .25s ease;
+}
+.tetris-toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 480px) {
+  .tetris-grid { width: 66px; grid-auto-rows: 9px; left: 10px; }
+}
+
+/* Barril rodante — Donkey Kong */
+.dk-barrel {
+  position: fixed;
+  top: -60px;
+  z-index: 997;
+  font-size: 2rem;
+  pointer-events: none;
+  animation-name: barrelRoll, barrelSpin;
+  animation-timing-function: linear, linear;
+  animation-fill-mode: forwards, forwards;
+}
+
+@keyframes barrelSpin {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(0deg); } /* placeholder, la rotación real va en transform inline */
+}
+
+.barrel-hero.jump {
+  animation: bhJump .5s ease;
+}
+
+@keyframes bhJump {
+  0%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-22px) scale(1.05); }
+  70% { transform: translateY(-4px); }
+}
+
+.barrel-hero {
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+}
+
+.barrel-hero:hover { transform: translateY(-2px); }
+.barrel-hero:active { transform: scale(.96); }
+
+.hero-combo {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  font-family: var(--pixel);
+  font-size: .6rem;
+  color: var(--yellow);
+  background: var(--navy);
+  border: 1px solid var(--yellow);
+  padding: 2px 5px;
+  animation: comboPop .5s ease;
+}
+
+@keyframes comboPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.barrel-hero.dodge-window .barrel-hero-avatar {
+  animation: bhAlert .3s ease infinite alternate;
+}
+
+@keyframes bhAlert {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.6) drop-shadow(0 0 6px var(--yellow)); }
+}
+
+.collect-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: var(--panel2);
+  margin-bottom: 16px;
+  font-size: .75rem;
+}
+.collect-counter .pixel { font-size: .6rem; color: var(--ice); }
+#collectCount { font-family: var(--pixel); font-size: .65rem; color: var(--yellow); }
+
+.cart.collected {
+  outline: 2px solid var(--green);
+}
+.cart.collected::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  color: var(--green);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.cart { position: relative; } /* necesario para el ::after */
+

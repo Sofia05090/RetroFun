@@ -425,6 +425,11 @@
         <p class="version-label">Pantalla de carga (splash)</p>
       </div>
 
+      <div class="collect-counter pixel-frame">
+  <span class="pixel">Colección</span>
+  <span id="collectCount">0/8</span>
+</div>
+
       <div class="col-md-4">
         <div class="cartridge pixel-frame">
           <img src="/retro-fun-logo.jpg" alt="Cartucho Retro Fun">
@@ -451,9 +456,24 @@
   <div class="container">
     <span class="pixel">Retro Fun</span>
     Manual de marca v1.0 — Uso interno del equipo y socios autorizados. © 2026.
+    <p class="konami-hint pixel">↑ ↑ ↓ ↓ ← → ← → B A</p>
   </div>
 </footer>
 
+<div class="high-score pixel-frame">
+  <span class="pixel">Mejor combo</span>
+  <span id="highScoreValue">0</span>
+</div>
+
+<div id="barrelHero" class="barrel-hero pixel-frame" role="button" tabindex="0" aria-label="Vigía de pistas, haz clic para más">
+  <div class="barrel-hero-avatar">🕹️</div>
+  <div id="heroBubble" class="hero-bubble">¿Conoces algún código secreto?</div>
+  <div id="heroCombo" class="hero-combo" hidden>+0</div>
+</div>
+
+
+
+<div id="tetrisGrid" class="tetris-grid pixel-frame" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>
