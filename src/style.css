@@ -260,3 +260,81 @@ footer .pixel{font-size:.6rem; color:var(--cyan); display:block; margin-bottom:1
 }
 .konami-toast.show{opacity:1; transform:translate(-50%,0);}
 .konami-toast small{display:block; margin-top:8px; color:var(--ice); font-family:var(--text); font-size:.8rem;}
+
+/* Puntero global con diseño de Space Invaders */
+body, body * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%2329e0ff' d='M6 2h2v2H6V2m10 0h2v2h-2V2M4 6h2v2H4V6m14 0h2v2h-2V6M2 8h20v2H2V8m0 2h20v4H2v-4m2 4h2v2H4v-2m14 0h2v2h-2v-2m-8 2h4v2h-4v-2z'/%3E%3C/svg%3E"), auto !important;
+}
+
+input, textarea {
+  cursor: text !important;
+}
+.laser-shot {
+  position: fixed;
+  width: 4px;
+  height: 14px;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  pointer-events: none;
+  z-index: 10001;
+  animation: laser-shoot 0.6s linear forwards;
+}
+
+@keyframes laser-shoot {
+  0% { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(-50%, -120px); opacity: 0; }
+}
+
+/* --- ARCADE GHOST PATROL: DISEÑO PIXEL ART AUTÉNTICO --- */
+
+.pacman-ghost-idle {
+  position: fixed;
+  bottom: 25px;
+  left: -140px;
+  width: 44px;
+  height: 44px;
+  z-index: 9997;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  clip-path: polygon(
+    25% 0%, 75% 0%, 
+    100% 25%, 100% 100%, 
+    88% 80%, 75% 95%, 
+    62% 80%, 50% 95%, 
+    38% 80%, 25% 95%, 
+    12% 80%, 0% 95%, 
+    0% 25%
+  );
+}
+
+/* Colores vibrantes con halo lumínico de gabinete arcade */
+.pacman-ghost-idle.blinky { background-color: #ff1c1c; box-shadow: 0 0 16px rgba(255, 28, 28, 0.85); }
+.pacman-ghost-idle.pinky  { background-color: #ff85ff; box-shadow: 0 0 16px rgba(255, 133, 255, 0.85); }
+.pacman-ghost-idle.inky   { background-color: #00f0f0; box-shadow: 0 0 16px rgba(0, 240, 240, 0.85); }
+.pacman-ghost-idle.clyde  { background-color: #ff9f1c; box-shadow: 0 0 16px rgba(255, 159, 28, 0.85); }
+
+/* Ojos retro dinámicos con efecto de mirada fija tipo CRT */
+.pacman-ghost-idle::before,
+.pacman-ghost-idle::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  width: 10px;
+  height: 14px;
+  background-color: #ffffff;
+  border-radius: 1px;
+}
+
+.pacman-ghost-idle::before { left: 9px; box-shadow: inset 5px 0 0 #0000cc; }
+.pacman-ghost-idle::after  { right: 9px; box-shadow: inset 5px 0 0 #0000cc; }
+
+.pacman-ghost-idle.active {
+  opacity: 1;
+  animation: ghost-float-arcade 0.35s infinite alternate ease-in-out;
+}
+
+@keyframes ghost-float-arcade {
+  0% { transform: translateY(0) scaleY(1); }
+  100% { transform: translateY(-6px) scaleY(0.97); }
+}

@@ -79,3 +79,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 })();
+
+document.addEventListener('click', (e) => {
+  const laser = document.createElement('div');
+  laser.className = 'laser-shot';
+  laser.style.left = `${e.clientX}px`;
+  laser.style.top = `${e.clientY}px`;
+  document.body.appendChild(laser);
+  setTimeout(() => laser.remove(), 600);
+});
+
+// --- MOTOR DE PATRULLAJE OPTIMIZADO (COOLDOWN REDUCIDO Y MAYOR ESPACIADO) ---
+document.addEventListener('DOMContentLoaded', () => {
+  let idleTimer;
+  let isRunning = false;
+  const idleLimit = 2500; // Cooldown reducido a 2.5 segundos de inactividad
+  const ghostTypes = ['blinky', 'pinky', 'inky', 'clyde'];
+  const squad = [];
+
+  // Crear la fila de fantasmas con mayor distancia entre ellos (120px)
+  ghostTypes.forEach((type, index) => {
+    const ghost = document.createElement('div');
+    ghost.className = `pacman-ghost-idle ${type}`;
+    document.body.appendChild(ghost);
+    squad.push({ element: ghost, spacing: index * 120 });
+  });
+
+  function triggerGhostPatrol() {
+    if (isRunning) return;
+    isRunning = true;
+
+    squad.forEach(item => item.element.classList.add('active'));
+
+    const startTime = performance.now();
+    const duration = 5500;
+
+    function animateSquad(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const leadLeft = -140 + (progress * (window.innerWidth + 500));
+
+      squad.forEach((item) => {
+        const ghostLeft = leadLeft - item.spacing;
+        item.element.style.left = `${ghostLeft}px`;
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(animateSquad);
+      } else {
+        squad.forEach(item => item.element.classList.remove('active'));
+        isRunning = false;
+      }
+    }
+
+    requestAnimationFrame(animateSquad);
+  }
+
+  function resetIdleTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(triggerGhostPatrol, idleLimit);
+  }
+
+  window.addEventListener('mousemove', resetIdleTimer);
+  window.addEventListener('keydown', resetIdleTimer);
+  window.addEventListener('scroll', resetIdleTimer);
+
+  resetIdleTimer();
+});
